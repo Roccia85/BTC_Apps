@@ -7,7 +7,7 @@ $(document).ready(function () {
         .DataTable({
             "processing": true,
             "ajax": {
-                "url": "https://api.coinmarketcap.com/v1/ticker/?convert=EUR&limit=300",
+                "url": "https://api.coinmarketcap.com/v1/ticker/?convert=EUR&limit=500",
                 "dataSrc": ""
 
             },
@@ -19,7 +19,7 @@ $(document).ready(function () {
                 },
                 {
                     "data": "price_eur",
-                    render: $.fn.dataTable.render.number('.', ',', 8, ''),
+                    render: $.fn.dataTable.render.number('.', ',', 5, ''),
                     "sClass": "right"
                 },
                 {
@@ -38,6 +38,22 @@ $(document).ready(function () {
                     "sClass": "right"
                 },
                 {
+                    "data": "percent_change_1h",
+                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
+                    "sClass": "right"
+                },
+                {
+                    "data": "percent_change_24h",
+                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
+                    "sClass": "right"
+                },
+                {
+                    "data": "percent_change_7d",
+                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
+                    "sClass": "right"
+                },
+
+                {
                     mRender: function (data, type, row) {
                         var ratio = parseFloat(row['market_cap_eur'] / row['24h_volume_eur']);
                         return ratio.toFixed(5);
@@ -47,11 +63,35 @@ $(document).ready(function () {
             ],
             "createdRow": function (row, data, index) {
                 var ratio = parseFloat(data['market_cap_eur'] / data['24h_volume_eur']);
+                var change1h = parseFloat(data['percent_change_1h']);
+                var change24h = parseFloat(data['percent_change_24h']);
+                var change7d = parseFloat(data['percent_change_7h']);
                 if (ratio < 8) {
-                    $(row).addClass('marked');
+                    if (change1h >= 0)
+                        $(row).addClass('markedUp');
+                    else {
+                        $(row).addClass('markedDown');
+                    }
+                }
+                else {
+                    if (change1h >= 0)
+                        $('td', row).eq(6).addClass('markedTextUp');
+                    else {
+                        $('td', row).eq(6).addClass('markedTextDown');
+                    }
+                    if (change24h >= 0)
+                        $('td', row).eq(7).addClass('markedTextUp');
+                    else {
+                        $('td', row).eq(7).addClass('markedTextDown');
+                    }
+                    if (change7d >= 0)
+                        $('td', row).eq(8).addClass('markedTextUp');
+                    else {
+                        $('td', row).eq(8).addClass('markedTextDown');
+                    }
                 }
             },
-            "order": [[2, "desc"]],
+            "order": [[4, "desc"]],
             "pageLength": 100,
             dom: 'lfrt<B>p',
             buttons: [

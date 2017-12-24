@@ -28,8 +28,20 @@ textarea {
     width: 100%;
 }
 
-.marked {
+.markedUp {
     background-color: rgba(0, 255, 0, 0.2) !important;
+}
+
+.markedDown {
+    background-color: rgba(215, 44, 44, 0.2) !important;
+}
+
+.markedTextUp {
+    background-color: rgba(0, 255, 0, 0.1) !important;
+}
+
+.markedTextDown {
+    background-color: rgba(215, 44, 44, 0.05) !important;
 }
 
 

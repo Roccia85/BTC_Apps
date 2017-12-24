@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Chroniton;
+using MCapAnalyzer.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace MCapAnalyzer
 {
@@ -29,6 +32,12 @@ namespace MCapAnalyzer
         {
             // Add framework services.
             services.AddMvc();
+
+            services.AddDbContext<MCapAnalyzerContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
+
+            services.AddSingleton<ISingularity, Singularity>(serviceProvider => Singularity.Instance);
+
+            //services.AddTransient<IMCapAnalyzerContext, MCapAnalyzerContext>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -55,6 +64,9 @@ namespace MCapAnalyzer
                     name: "default",
                     template: "{controller=Home}/{action=Index}/{id?}");
             });
+
+            var singularity = Singularity.Instance;
+            singularity.Start();
         }
     }
 }
