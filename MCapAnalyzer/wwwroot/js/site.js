@@ -3,11 +3,13 @@
 
 $(document).ready(function () {
 
-    $("#coinTable")
+
+
+    $("#newCoinTable")
         .DataTable({
             "processing": true,
             "ajax": {
-                "url": "https://api.coinmarketcap.com/v1/ticker/?convert=EUR&limit=500",
+                "url": "Home/CapsAsync?numberOfToken=20",
                 "dataSrc": ""
 
             },
@@ -18,55 +20,66 @@ $(document).ready(function () {
                     "sClass": "center"
                 },
                 {
-                    "data": "price_eur",
+                    "data": "valueEur",
                     render: $.fn.dataTable.render.number('.', ',', 5, ''),
                     "sClass": "right"
                 },
                 {
-                    "data": "price_btc",
+                    "data": "valueBtc",
                     render: $.fn.dataTable.render.number('.', ',', 8, ''),
                     "sClass": "right"
                 },
                 {
-                    "data": "market_cap_eur",
+                    "data": "marketCap",
                     render: $.fn.dataTable.render.number('.', ',', 0, ''),
                     "sClass": "right"
                 },
                 {
-                    "data": "24h_volume_eur",
+                    "data": "change1h",
+                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
+                    "sClass": "right"
+                },
+                {
+                    "data": "change24h",
+                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
+                    "sClass": "right"
+                },
+                {
+                    "data": "change7d",
+                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
+                    "sClass": "right"
+                },
+                {
+                    "data": "volume24h",
                     render: $.fn.dataTable.render.number('.', ',', 0, ''),
                     "sClass": "right"
                 },
                 {
-                    "data": "percent_change_1h",
-                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
+                    "data": "marketCapVolume",
+                    render: $.fn.dataTable.render.number('.', ',', 4, ''),
                     "sClass": "right"
                 },
                 {
-                    "data": "percent_change_24h",
-                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
+                    "data": "hourlyVolumeDiff",
+                    render: $.fn.dataTable.render.number('.', ',', 0, ''),
                     "sClass": "right"
                 },
                 {
-                    "data": "percent_change_7d",
-                    render: $.fn.dataTable.render.number('.', ',', 2, ''),
-                    "sClass": "right"
-                },
-
-                {
-                    mRender: function (data, type, row) {
-                        var ratio = parseFloat(row['market_cap_eur'] / row['24h_volume_eur']);
-                        return ratio.toFixed(5);
-                    },
+                    "data": "hourlyMarketCapVolume",
+                    render: $.fn.dataTable.render.number('.', ',', 4, ''),
                     "sClass": "right"
                 }
             ],
             "createdRow": function (row, data, index) {
-                var ratio = parseFloat(data['market_cap_eur'] / data['24h_volume_eur']);
-                var change1h = parseFloat(data['percent_change_1h']);
-                var change24h = parseFloat(data['percent_change_24h']);
-                var change7d = parseFloat(data['percent_change_7h']);
-                if (ratio < 8) {
+                var ratio = parseFloat(data['marketCapVolume']);
+                console.info(ratio);
+                var change1h = parseFloat(data['change1h']);
+                var change24h = parseFloat(data['change24h']);
+                var change7d = parseFloat(data['change7d']);
+                var colChange1h = 5;
+                var colChange24h = 6;
+                var colChange7d = 7;
+                if (Math.abs(ratio) < 8) {
                     if (change1h >= 0)
                         $(row).addClass('markedUp');
                     else {
@@ -75,63 +88,31 @@ $(document).ready(function () {
                 }
                 else {
                     if (change1h >= 0)
-                        $('td', row).eq(6).addClass('markedTextUp');
+                        $('td', row).eq(colChange1h).addClass('markedTextUp');
                     else {
-                        $('td', row).eq(6).addClass('markedTextDown');
+                        $('td', row).eq(colChange1h).addClass('markedTextDown');
                     }
                     if (change24h >= 0)
-                        $('td', row).eq(7).addClass('markedTextUp');
+                        $('td', row).eq(colChange24h).addClass('markedTextUp');
                     else {
-                        $('td', row).eq(7).addClass('markedTextDown');
+                        $('td', row).eq(colChange24h).addClass('markedTextDown');
                     }
                     if (change7d >= 0)
-                        $('td', row).eq(8).addClass('markedTextUp');
+                        $('td', row).eq(colChange7d).addClass('markedTextUp');
                     else {
-                        $('td', row).eq(8).addClass('markedTextDown');
+                        $('td', row).eq(colChange7d).addClass('markedTextDown');
                     }
                 }
             },
-            "order": [[4, "desc"]],
+            //"order": [[9, "asc"]],
             "pageLength": 100,
             dom: 'lfrt<B>p',
             buttons: [
                 'excel'
             ]
-            //"columnDefs": [
-            //    {
-            //        // The `data` parameter refers to the data for the cell (defined by the
-            //        // `data` option, which defaults to the column being worked with, in
-            //        // this case `data: 0`.
-            //        "render": function (data, type, row) {
-            //            console.log(row);
-            //            return data + ' (' + row[1] + ')';
-            //        },
-            //        "targets": 0
-            //    }
-            //]
 
         });
 });
-
-function FillTable(n) {
-    $.getJSON('https://api.coinmarketcap.com/v1/ticker/?convert=EUR&limit=' + n, function (data) {
-        var th = "<tr><th>Coin</th><th>Symbol</th><th>Value €</th><th>Market cap €</th><th>Volume 24h €</th><th>MCap / Volume</th></tr >";
-        //$("#coinTable").html(th);
-        $.each(data, function (key, value) {
-            var tr = "<tr>";
-            var td1 = "<td>" + value.name + "</td>"
-                + "<td>" + value.symbol + "</td>"
-                + "<td>" + value.price_eur + "</td>"
-                + "<td>" + value['market_cap_eur'] + "</td>"
-                + "<td>" + value['24h_volume_eur'] + "</td>"
-                + "<td>" + value.market_cap_eur / value['24h_volume_eur'] + "</td></tr>"
-            $("#coinTable").append(tr + td1);
-        });
-
-
-    });
-}
-
 
 function exportExcel() {
     $(".table2excel").table2excel({
@@ -146,8 +127,4 @@ function exportExcel() {
 
 }
 
-function RefreshTable() {
-    var n = $('#coins')[0].value;
-    FillTable(n);
-}
 

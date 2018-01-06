@@ -10,6 +10,8 @@ using Microsoft.Extensions.Logging;
 using Chroniton;
 using MCapAnalyzer.Models;
 using Microsoft.EntityFrameworkCore;
+using MCapAnalyzer.DAL;
+using MCapAnalyzer.Application.ExternalApi;
 
 namespace MCapAnalyzer
 {
@@ -30,13 +32,15 @@ namespace MCapAnalyzer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            // Add framework services.
-            services.AddMvc();
 
-            services.AddDbContext<MCapAnalyzerContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")), ServiceLifetime.Transient);
+
+            services.AddDbContext<MCapAnalyzerContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddSingleton<ISingularity, Singularity>(serviceProvider => Singularity.Instance);
-
+            services.AddSingleton<ITickerRepository, TickerRepository>();
+            services.AddTransient<ITickerApi, TickerApi>();
+            // Add framework services.
+            services.AddMvc();
             //services.AddTransient<IMCapAnalyzerContext, MCapAnalyzerContext>();
         }
 
