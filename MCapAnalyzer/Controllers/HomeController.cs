@@ -26,31 +26,44 @@ namespace MCapAnalyzer.Controllers
         public async Task<JsonResult> CapsAsync(int numberOfToken)
         {
             var marketCapInfoList = GetMarketCapInfos(numberOfToken);
+            var volumeHistoryList = GetVolumeHistory();
             var table = new List<TableRow>();
             foreach (MarketCap mc in marketCapInfoList)
             {
-                var volumeHistoryList = GetVolumeHistory(mc.symbol);
-                var marketCap = float.Parse(mc.market_cap_eur.Replace(".", ","));
-                double hourlyMarketCapVolume = marketCap / Math.Abs(volumeHistoryList[0].hourlyDiff);
-                double volume24h;
-                double marketCapVolume = 0;
-                if (double.TryParse(mc._24h_volume_eur.Replace(".", ","), out volume24h))
-                    marketCapVolume = double.Parse(mc.market_cap_eur.Replace(".", ",")) / double.Parse(mc._24h_volume_eur.Replace(".", ","));
-                table.Add(new TableRow()
+                try
                 {
-                    Name = mc.name,
-                    Symbol = mc.symbol,
-                    ValueBtc = mc.price_btc,
-                    ValueEur = mc.price_eur,
-                    Volume24h = mc._24h_volume_eur,
-                    MarketCap = mc.market_cap_eur,
-                    Change1h = mc.percent_change_1h,
-                    Change7d = mc.percent_change_7d,
-                    Change24h = mc.percent_change_24h,
-                    HourlyMarketCapVolume = hourlyMarketCapVolume.ToString().Replace(",", "."),
-                    HourlyVolumeDiff = volumeHistoryList[0].hourlyDiff.ToString(),
-                    MarketCapVolume = marketCapVolume.ToString().Replace(",", ".")
-                });
+                    var volumeHistory = volumeHistoryList.Where(c => c.symbol == mc.symbol).First();
+                    if (volumeHistory == null)
+                        continue;
+                    var marketCap = float.Parse(mc.market_cap_usd.Replace(".", ","));
+                    double hourlyMarketCapVolume = 0;
+                    if (volumeHistory.hourlyDiff.HasValue)
+                        hourlyMarketCapVolume = marketCap / Math.Abs(volumeHistory.hourlyDiff.Value);
+                    double volume24h;
+                    double marketCapVolume = 0;
+                    if (double.TryParse(mc._24h_volume_usd.Replace(".", ","), out volume24h))
+                        marketCapVolume = double.Parse(mc.market_cap_usd.Replace(".", ",")) / double.Parse(mc._24h_volume_usd.Replace(".", ","));
+                    table.Add(new TableRow()
+                    {
+                        Name = mc.name,
+                        Symbol = mc.symbol,
+                        ValueBtc = mc.price_btc,
+                        ValueEur = mc.price_eur,
+                        Volume24h = mc._24h_volume_eur,
+                        MarketCap = mc.market_cap_eur,
+                        Change1h = mc.percent_change_1h,
+                        Change7d = mc.percent_change_7d,
+                        Change24h = mc.percent_change_24h,
+                        HourlyMarketCapVolume = hourlyMarketCapVolume.ToString().Replace(",", "."),
+                        HourlyVolumeDiff = volumeHistory.hourlyDiff.ToString().Replace(",", "."),
+                        MarketCapVolume = marketCapVolume.ToString().Replace(",", ".")
+                    });
+                }
+                catch (Exception ex)
+                {
+
+
+                }
             }
 
 
@@ -64,11 +77,19 @@ namespace MCapAnalyzer.Controllers
             return JsonConvert.DeserializeObject<List<MarketCap>>(streamTask.Result);
         }
 
-        private List<VolumeHistory> GetVolumeHistory(string symbol)
+        private List<VolumeHistory> GetVolumeHistory()
         {
-            var client = new HttpClient();
-            var streamTask = client.GetStringAsync("http://dierre.chickenkiller.com/" + symbol);
-            return JsonConvert.DeserializeObject<List<VolumeHistory>>(streamTask.Result);
+            try
+            {
+                var client = new HttpClient();
+                var streamTask = client.GetStringAsync("http://dierre.chickenkiller.com/");
+                return JsonConvert.DeserializeObject<List<VolumeHistory>>(streamTask.Result);
+            }
+            catch (Exception ex)
+            {
+
+                throw;
+            }
         }
     }
 }

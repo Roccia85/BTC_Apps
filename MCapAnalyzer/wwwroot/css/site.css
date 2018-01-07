@@ -44,4 +44,11 @@ textarea {
     background-color: rgba(215, 44, 44, 0.05) !important;
 }
 
+th {
+    font-size: 13px;
+}
+
+td {
+    font-size: 13px;
+}
 

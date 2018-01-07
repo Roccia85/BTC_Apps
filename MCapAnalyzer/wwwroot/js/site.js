@@ -9,7 +9,7 @@ $(document).ready(function () {
         .DataTable({
             "processing": true,
             "ajax": {
-                "url": "Home/CapsAsync?numberOfToken=20",
+                "url": "Home/CapsAsync?numberOfToken=600",
                 "dataSrc": ""
 
             },
