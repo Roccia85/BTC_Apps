@@ -71,7 +71,8 @@ $(document).ready(function () {
                 }
             ],
             "createdRow": function (row, data, index) {
-                var ratio = parseFloat(data['marketCapVolume']);
+                var ratio = parseFloat(data['hourlyMarketCapVolume']);
+                var discriminant = parseFloat(data['hourlyVolumeDiff']);
                 console.info(ratio);
                 var change1h = parseFloat(data['change1h']);
                 var change24h = parseFloat(data['change24h']);
@@ -79,8 +80,8 @@ $(document).ready(function () {
                 var colChange1h = 5;
                 var colChange24h = 6;
                 var colChange7d = 7;
-                if (Math.abs(ratio) < 8) {
-                    if (change1h >= 0)
+                if (Math.abs(ratio) < 150) {
+                    if (discriminant >= 0)
                         $(row).addClass('markedUp');
                     else {
                         $(row).addClass('markedDown');
