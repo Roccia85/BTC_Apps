@@ -104,7 +104,7 @@ $(document).ready(function () {
                     }
                 }
             },
-            //"order": [[9, "asc"]],
+            "order": [[11, "asc"]],
             "pageLength": 100,
             dom: 'lfrt<B>p',
             buttons: [
